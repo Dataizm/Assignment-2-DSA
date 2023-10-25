@@ -1,47 +1,85 @@
 import ballerina/graphql;
 
-// import ballerina/io;
-
-type Course record {
-    readonly string code;
+type Department record {
     string name;
-    string description;
+    string hod;
+    Objectives[] objectives;
 };
 
-type CourseReq record {
-    string code;
-    string name;
-    string description;
+type Employee record {
+    string firstName;
+    string lastName;
+    string jobTitle;
+    KPI[] kpis;
 };
 
-table<Course> key(code) courseTable = table [];
+type Supervisor record {
+    string firstName;
+    string lastName;
+    Employee[] supervisees;
+};
+
+type KPI record {
+    string description;
+    float score; // Assuming the score is a float value
+};
+
+type Objectives record {
+    string description;
+    float percentageContribution;
+};
 
 @graphql:ServiceConfig {
-    graphiql: {
-        enabled: true
-    // Path is optional, if not provided, it will be dafulted to `/graphiql`.
-    // path: "/testing"
-    }
+    // Service configuration
 }
-service / on new graphql:Listener(3000) {
+service / on new graphql:Listener(4000) {
 
-    // function to get all courses
-    resource function get getAllCourses() returns table<Course> {
-        return courseTable;
+    // Queries
+    resource function get department(string name) returns Department {
+        // Implementation
     }
 
-    resource function get getCourseByCode(string code) returns Course {
-        Course foundCourse = courseTable.get(code);
-        return foundCourse;
+    resource function get employee(string firstName, string lastName) returns Employee {
+        // Implementation
     }
 
-    // GraphiQL
+    resource function get supervisor(string firstName, string lastName) returns Supervisor {
+        // Implementation
+    }
 
-    remote function createCourse(CourseReq newCourse) returns string {
-        var {code, ...data} = newCourse;
-        courseTable.add({code: code, ...data});
-        courseTable.add({code: newCourse.code, name:newCourse.name, description:newCourse.description});
-        return newCourse.name + "saved successfuly";
+    // Mutations for HoD
+    remote function createDepartment(string name, string hod) returns Department {
+        // Implementation
+    }
+
+    remote function deleteDepartment(string name) returns string {
+        // Implementation
+    }
+
+    // Mutations for Supervisor
+    remote function approveKPI(string employeeName, string kpiDescription) returns KPI {
+        // Implementation
+    }
+
+    remote function deleteKPI(string employeeName, string kpiDescription) returns string {
+        // Implementation
+    }
+
+    remote function updateKPI(string employeeName, string kpiDescription, float newScore) returns KPI {
+        // Implementation
+    }
+
+    remote function gradeKPI(string employeeName, string kpiDescription, float grade) returns KPI {
+        // Implementation
+    }
+
+    // Mutations for Employee
+    remote function createKPI(string description, float score) returns KPI {
+        // Implementation
+    }
+
+    remote function gradeSupervisor(string supervisorName, float grade) returns string {
+        // Implementation
     }
 
 }
