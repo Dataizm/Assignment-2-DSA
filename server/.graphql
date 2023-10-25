@@ -1,0 +1,20 @@
+# Define the Employee type
+type Employee {
+  employee_id: ID!
+  first_name: String!
+  last_name: String!
+  kpi: KPI
+}
+
+# Define the KPI type
+type KPI {
+  kpi_id: ID!
+  description: String!
+  employee: Employee!
+}
+
+# Define the root Query type
+type Query {
+  getEmployee(employee_id: ID!): Employee
+  getKPI(kpi_id: ID!): KPI
+}
