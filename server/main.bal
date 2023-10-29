@@ -1,85 +1,80 @@
 import ballerina/graphql;
 
-type Department record {
-    string name;
-    string hod;
-    Objectives[] objectives;
-};
+public type CovidEntry record {|
+    readonly string isoCode;
+    string country;
+    decimal cases?;
+    decimal deaths?;
+    decimal recovered?;
+    decimal active?;
+|};
 
-type Employee record {
-    string firstName;
-    string lastName;
-    string jobTitle;
-    KPI[] kpis;
-};
+table<CovidEntry> key(isoCode) covidEntriesTable = table [
+    {isoCode: "AFG", country: "Afghanistan", cases: 159303, deaths: 7386, recovered: 146084, active: 5833},
+    {isoCode: "SL", country: "Sri Lanka", cases: 598536, deaths: 15243, recovered: 568637, active: 14656},
+    {isoCode: "US", country: "USA", cases: 69808350, deaths: 880976, recovered: 43892277, active: 25035097}
+];
 
-type Supervisor record {
-    string firstName;
-    string lastName;
-    Employee[] supervisees;
-};
+public distinct service class CovidData {
+    private final readonly & CovidEntry entryRecord;
 
-type KPI record {
-    string description;
-    float score; // Assuming the score is a float value
-};
+    function init(CovidEntry entryRecord) {
+        self.entryRecord = entryRecord.cloneReadOnly();
+    }
 
-type Objectives record {
-    string description;
-    float percentageContribution;
-};
+    resource function get isoCode() returns string {
+        return self.entryRecord.isoCode;
+    }
 
-@graphql:ServiceConfig {
-    // Service configuration
+    resource function get country() returns string {
+        return self.entryRecord.country;
+    }
+
+    resource function get cases() returns decimal? {
+        if self.entryRecord.cases is decimal {
+            return self.entryRecord.cases / 1000;
+        }
+        return;
+    }
+
+    resource function get deaths() returns decimal? {
+        if self.entryRecord.deaths is decimal {
+            return self.entryRecord.deaths / 1000;
+        }
+        return;
+    }
+
+    resource function get recovered() returns decimal? {
+        if self.entryRecord.recovered is decimal {
+            return self.entryRecord.recovered / 1000;
+        }
+        return;
+    }
+
+    resource function get active() returns decimal? {
+        if self.entryRecord.active is decimal {
+            return self.entryRecord.active / 1000;
+        }
+        return;
+    }
 }
-service / on new graphql:Listener(4000) {
 
-    // Queries
-    resource function get department(string name) returns Department {
-        // Implementation
+service /covid19 on new graphql:Listener(9000) {
+    resource function get all() returns CovidData[] {
+        CovidEntry[] covidEntries = covidEntriesTable.toArray().cloneReadOnly();
+        return covidEntries.map(entry => new CovidData(entry));
     }
 
-    resource function get employee(string firstName, string lastName) returns Employee {
-        // Implementation
+    resource function get filter(string isoCode) returns CovidData? {
+        CovidEntry? covidEntry = covidEntriesTable[isoCode];
+        if covidEntry is CovidEntry {
+            return new (covidEntry);
+        }
+        return;
     }
 
-    resource function get supervisor(string firstName, string lastName) returns Supervisor {
-        // Implementation
+    remote function add(CovidEntry entry) returns CovidData {
+        covidEntriesTable.add(entry);
+        return new CovidData(entry);
     }
-
-    // Mutations for HoD
-    remote function createDepartment(string name, string hod) returns Department {
-        // Implementation
-    }
-
-    remote function deleteDepartment(string name) returns string {
-        // Implementation
-    }
-
-    // Mutations for Supervisor
-    remote function approveKPI(string employeeName, string kpiDescription) returns KPI {
-        // Implementation
-    }
-
-    remote function deleteKPI(string employeeName, string kpiDescription) returns string {
-        // Implementation
-    }
-
-    remote function updateKPI(string employeeName, string kpiDescription, float newScore) returns KPI {
-        // Implementation
-    }
-
-    remote function gradeKPI(string employeeName, string kpiDescription, float grade) returns KPI {
-        // Implementation
-    }
-
-    // Mutations for Employee
-    remote function createKPI(string description, float score) returns KPI {
-        // Implementation
-    }
-
-    remote function gradeSupervisor(string supervisorName, float grade) returns string {
-        // Implementation
-    }
-
 }
