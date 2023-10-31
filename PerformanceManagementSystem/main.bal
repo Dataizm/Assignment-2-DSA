@@ -1,6 +1,7 @@
 import ballerina/graphql;
 import ballerina/http;
 import ballerina/sql;
+import ballerinax/java.jdbc;
 import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
 // Define the record type for Department Objectives
