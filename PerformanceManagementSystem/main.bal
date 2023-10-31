@@ -1,4 +1,8 @@
 import ballerina/graphql;
+import ballerina/http;
+import ballerina/sql;
+import ballerinax/mysql;
+import ballerinax/mysql.driver as _;
 // Define the record type for Department Objectives
 public type DeptObjective record {|
     readonly string id;
@@ -50,6 +54,14 @@ public distinct service class PerformanceData {
 }
 
 service /performanceManagement on new graphql:Listener(9000) {
+     private final mysql:Client db;
+
+     function init() returns error? {
+        // Initiate the mysql client at the start of the service. This will be used
+        // throughout the lifetime of the service.
+        self.db = check new ("localhost", "root", "Test@123", "MUSIC_STORE", 3306);
+    }
+
     resource function get allObjectives() returns DeptObjective[] {
         DeptObjective[] deptObjectives = deptObjectivesTable.toArray().cloneReadOnly();
         return deptObjectives;
