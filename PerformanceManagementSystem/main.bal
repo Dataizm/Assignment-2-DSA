@@ -1,5 +1,4 @@
 import ballerina/graphql;
-
 // Define the record type for Department Objectives
 public type DeptObjective record {|
     readonly string id;
